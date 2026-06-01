@@ -1,0 +1,39 @@
+---
+title: "Chapter 2 Probability"
+format: html
+editor: visual
+---
+
+# 2.1 Probability basics
+
+-   An *experiment* is a process that produces an *observation*
+
+-   An *outcome* is a possible observation
+
+-   The set of all possible outcomes is called the *sample space*
+
+-   An *event* is a subset of the sample space
+
+-   A *trial* is a single running of an experiment
+
+Let $A$ and $B$ be *events in the sample space* $S$.
+
+-   $P(\emptyset)=0$
+
+-   If $A$ and $B$ are *disjoint*, then $P(A \cup B)=P(A) + P(B)$
+
+-   If $A \subset B$, then $P(A) \leq P(B)$.
+
+-   $0 \leq P(A) \leq 1$.
+
+-   $P(A) = 1 - P (\overline{A})$.
+
+-   $P(A-B)=P(A)-P(A\cap B)$.
+
+-   $P(A \cup B)=P(A)+P(B)-P(A \cap B)$.
+
+<br>
+
+The *odds* of an event $E$ are $\frac{P(E)}{1-P(E)}$.
+
+# 2.2 Simulations
