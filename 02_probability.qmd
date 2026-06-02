@@ -37,3 +37,114 @@ Let $A$ and $B$ be *events in the sample space* $S$.
 The *odds* of an event $E$ are $\frac{P(E)}{1-P(E)}$.
 
 # 2.2 Simulations
+
+## 2.2.1 Simulation with `sample`
+
+Get a random number from 1 to 10:
+
+```{r}
+sample(x = 1:10, size = 1)
+```
+
+Define how many random numbers we want:
+
+```{r}
+sample(x = 1:10, size = 8)
+```
+
+If we sample for more than 10 different numbers, we get an error:
+
+```{r}
+#| error: true
+sample(x = 1:10, size = 30)
+```
+
+To sample with replacement:
+
+```{r}
+sample(x = 1:10, size = 20, replace = TRUE)
+```
+
+Example: US blood types
+
+```{r}
+bloodtypes <- c("O", "A", "B", "AB")
+bloodprobs <- c(0.45, 0.40, 0.11, 0.04)
+sample(x = bloodtypes, size = 30, prob = bloodprobs, replace = TRUE)
+```
+
+A large sample reproduces the original probabilities with reasonable accuracy:
+
+```{r}
+sim_data <- sample(
+  x = bloodtypes, size = 10000,
+  prob = bloodprobs, replace = TRUE
+)
+table(sim_data)
+table(sim_data) / 10000
+rstatix::freq_table(sim_data)
+```
+
+## 2.2.2 Using simulation to estimate probabilities
+
+Three-step process:
+
+1.  Simulate the experiment many times to produce a vector of outcomes
+2.  Test if the outcomes are in the event to produce a vector of TRUE/FALSE
+3.  Compute the `mean` of the TRUE/FALSE vector to compute the probability estimate
+
+```{r}
+# Simulate 10,000 rolls of 2 dice
+die1 <- sample(x = 1:6, size = 10000, replace = TRUE)
+die2 <- sample(x = 1:6, size = 10000, replace = TRUE)
+
+# Add the two dice
+sumDice <- die1 + die2
+```
+
+```{r}
+head(die1)
+head(die2)
+head(sumDice)
+```
+
+Let $E$ be the event "the sum of the dice is 6", and $F$ be the event "at least one of the dice is a 2".
+
+```{r}
+eventE <- sumDice == 6
+head(eventE)
+```
+
+```{r}
+eventF <- die1 == 2 | die2 == 2
+head(eventF)
+```
+
+From theory, $P(E)=\frac{5}{36}\approx0.139$, and $P(F)=\frac{11}{36}\approx0.306$.
+
+```{r}
+mean(eventE)  # P(E)
+mean(eventF)  # P(F)
+```
+
+To estimate $P(E \cap F) = \frac{2}{36} \approx 0.056$:
+
+```{r}
+mean(eventE & eventF)
+```
+
+To estimate $P(E \cup F) \approx 0.389$:
+
+```{r}
+mean((sumDice == 6) | (die1 == 2 | die2 == 2))
+```
+
+**Bernouilli's theorem:**
+
+Let $E$ be an event with probability $p$. Let $m_n$ be the number of times that $E$ occurs in $n$ repeated trials, where we assume the outcome of trials do not affect the outcome of other trials. Then
+
+$$
+\lim_{x\to\infty} \frac{m_n}{n}=p
+$$
+
+## 2.2.3 Using `replicate` to repeat experiments
