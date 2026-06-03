@@ -4,6 +4,11 @@ format: html
 editor: visual
 ---
 
+```{r}
+#| include: false
+library(tidyverse)
+```
+
 # 2.1 Probability basics
 
 -   An *experiment* is a process that produces an *observation*
@@ -148,3 +153,249 @@ $$
 $$
 
 ## 2.2.3 Using `replicate` to repeat experiments
+
+Estimate the probability that the sum of seven dice is larger than 30.
+
+Simulate the event once:
+
+```{r}
+dice <- sample(x = 1:6, size = 7, replace = TRUE)
+sum(dice) > 30
+```
+
+Using `replicate` repeats the experiment many times:
+
+```{r}
+replicate(n = 20,
+          expr = {
+            dice <- sample(x = 1:6, size = 7, replace = TRUE)
+            sum(dice) > 30
+          })
+```
+
+To compute the probability of the event, we replicate 10,000 times for a reasonably accurate estimate:
+
+```{r}
+event <- replicate(
+  n = 10000,
+  expr = {
+    dice <- sample(x = 1:6, size = 7, replace = TRUE)
+    sum(dice) > 30
+    })
+
+mean(event)
+```
+
+Recommendations:
+
+1.  Write code that performs the experiment a single time
+2.  Replicate the experiment a small number of times and check the results
+3.  Replicate the experiment a large number of times and store the result
+4.  Compute probability using `mean(event)`
+
+Example: three dice are thrown. Estimate the probability that the largest value is a four.
+
+```{r}
+# One trial
+die_roll <- sample(x = 1:6, size = 3, replace = TRUE)
+max(die_roll) == 4
+```
+
+```{r}
+# A few trials
+replicate(n = 20, 
+          expr = {
+            die_roll <- sample(x = 1:6, size = 3, replace = TRUE)
+            max(die_roll) == 4
+          })
+```
+
+```{r}
+# Perform many trials and compute the probability of the event
+event <- replicate(
+  n = 10000, 
+  expr = {
+    die_roll <- sample(x = 1:6, size = 3, replace = TRUE)
+    max(die_roll) == 4
+    })
+mean(event)
+```
+
+Example: two dice are rolled. What is the probability that the sum is equal to 6?
+
+In theory: $P(E)=\frac{5}{36} \approx 0.138888$.
+
+```{r}
+# 10 trials
+mean(
+  replicate(
+    n = 10,
+    expr = {
+      sum(sample(x = 1:6, size = 2, replace = TRUE)) == 6
+    }))
+```
+
+```{r}
+# 200 trials
+mean(
+  replicate(
+    n = 200,
+    expr = {
+      sum(sample(x = 1:6, size = 2, replace = TRUE)) == 6
+    }))
+```
+
+```{r}
+# 10,000 trials
+mean(
+  replicate(
+    n = 10000,
+    expr = {
+      sum(sample(x = 1:6, size = 2, replace = TRUE)) == 6
+    }))
+```
+
+Estimate the probability of $E$ for simulations ranging from 100 trials to 10,000 trials.
+
+```{r}
+num_trials <- seq(from = 100, to = 10000, by = 100)
+
+res <- vector(mode = "numeric", length = length(num_trials))
+
+for (i in 1:length(num_trials)) {
+  res[i] <- mean(
+    replicate(
+      n = num_trials[i],
+      expr = {
+        sum(sample(x = 1:6, size = 2, replace = TRUE)) == 6
+    }))
+}
+```
+
+Illustration of the law of large numbers: probability estimates from simulation converge to the true probability as the number of trials increases.
+
+```{r}
+tibble(
+  trials = num_trials,
+  estimated_probability = res
+) |> 
+  ggplot() +
+  geom_line(aes(x = num_trials,
+                y = estimated_probability)) +
+  geom_hline(yintercept = 5/36)
+```
+
+Example: a fair coin is repeatedly tossed. Estimate the probability that you observe heads for the third time on the 10th toss.
+
+```{r}
+# Simulate one outcome
+coinToss <- sample(x = c("H", "T"), size = 10, replace = TRUE)
+coinToss
+```
+
+```{r}
+# Count the number of heads and check whether it is equal to three
+sum(coinToss == "H")
+sum(coinToss == "H") == 3
+```
+
+```{r}
+# Make sure we had only two heads in the first nine tosses
+coinToss[1:9]
+sum(coinToss[1:9] == "H") == 2
+```
+
+```{r}
+# Both of those have to be true in order for the event to occur
+sum(coinToss == "H") == 3 & sum(coinToss[1:9] == "H") == 2
+```
+
+Put this inside `replicate` and compute the probability
+
+```{r}
+event <- replicate(
+  n = 10000,
+  expr = {
+    coinToss <- sample(x = c("H", "T"), size = 10, replace = TRUE)
+    (sum(coinToss == "H") == 3 & sum(coinToss[1:9] == "H") == 2)
+  })
+
+mean(event)
+```
+
+Example: the birthday problem.
+
+Estimate the probability that out of 25 randomly selected people, at least two will have the same birthday. Assume that all birthdays are equaly likely, except that none are leap-day babies.
+
+An outcome for this experiment is 25 randomly selected birthdays, and the event $B$ is that at least two birthdays are the same.
+
+```{r}
+# Simulate the experiment
+set.seed(42)
+birthdays <- sample(x = 1:365, size = 25, replace = TRUE)
+birthdays
+```
+
+```{r}
+# Check for duplicates
+anyDuplicated(birthdays)
+which(birthdays == birthdays[8])
+```
+
+```{r}
+eventB <- replicate(
+  n = 10000,
+  expr = {
+    birthdays <- sample(x = 1:365, size = 25, replace = TRUE)
+    anyDuplicated(birthdays) > 0
+    })
+mean(eventB)
+```
+
+Example: three numbers are picked uniformly at random from the interval $(0, 1)$. What is the probability that a triangle can be formed whose side-lengths are the three numbers that you chose?
+
+We need to check whether the sum of the two smaller numbers is larger than the largest number.
+
+```{r}
+event <- replicate(
+  n = 10000,
+  expr = {
+    x <- sort(runif(n = 3, min = 0, max = 1))
+    sum(x[1:2]) > x[3]
+  })
+mean(event)
+```
+
+Example: if you buy a bag that contains 35 M&M's, what is the probability that it will contain exactly 9 Blue and 5 Red M&M's?
+
+```{r}
+mm.colors <- c("Blue", "Orange", "Green", "Yellow", "Red", "Brown")
+mm.probs <- c(25, 25, 12.5, 12.5, 12.5, 12.5)
+```
+
+```{r}
+bag <- sample(
+  x = mm.colors,
+  size = 35,
+  replace = TRUE,
+  prob = mm.probs
+)
+sum(bag == "Blue")
+```
+
+```{r}
+event <- replicate(
+  n = 10000,
+  expr = {
+    bag <- sample(
+      x = mm.colors,
+      size = 35,
+      replace = TRUE,
+      prob = mm.probs
+      )
+    sum(bag == "Blue") == 9 & sum(bag == "Red") == 5
+  })
+mean(event)
+```
+
+# 2.3 Conditional probability and independence
