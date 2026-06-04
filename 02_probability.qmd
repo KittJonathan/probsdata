@@ -413,3 +413,75 @@ P(A|B)=\frac{P(A \cap B)}{P(B)}=\frac{1 / 36}{5 / 36}=\frac{1}{5}
 $$
 
 ## 2.3.1 Independent events
+
+Example: you roll five ordinary dice. What is the probability that at least one six appears?
+
+```{r}
+# "Not A": no sixes appear.
+1 - (5/6)^5
+```
+
+```{r}
+# Simulation
+mean(replicate(
+  n = 10000,
+  expr = {
+    roll5 <- sample(x = 1:6, size = 5, replace = TRUE)
+    any(roll5 == 6)
+  }
+))
+```
+
+## 2.3.2 Simulating conditional probability
+
+$$
+P(A | B)=\frac{P(A \cap B)}{P(B)}
+$$
+
+Two dice are rolled. Estimate the conditional probability that the sum of the dice is at least 10, given that at least one of the dice is a 6.
+
+```{r}
+eventAB <- replicate(
+  n = 10000,
+  expr = {
+    dieRoll <- sample(x = 1:6, size = 2, replace = TRUE)
+    (sum(dieRoll) >= 10 && (6 %in% dieRoll))
+  }
+)
+
+probAB <- mean(eventAB)
+
+eventB <- replicate(
+  n = 10000,
+  expr = {
+    die_roll <- sample(x = 1:6, size = 2, replace = TRUE)
+    6 %in% die_roll
+  }
+)
+
+probB <- mean(eventB)
+
+probAB / probB
+```
+
+In theory:
+
+```{r}
+(5 / 36) / (11 / 36)
+```
+
+## 2.3.3 Bayes' Rule and conditioning
+
+Law of total probability: Let $A$ and $B$ be events in the sample space $S$. Then
+
+$$
+P(A)=P(A \cap B) + P(A \cap \bar{B})=P(A|B)P(B) + P(A|\bar{B})P(\bar{B})
+$$
+
+Example:
+
+-   The name "Mary" was given to 7065 girls in 1880, and to 11475 girls in 1980
+
+-   There were 97583 girls born in 1880, and 177907 girls born in 1980
+
+Suppose that a randomly selected girl born in
