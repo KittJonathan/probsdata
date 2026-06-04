@@ -399,3 +399,17 @@ mean(event)
 ```
 
 # 2.3 Conditional probability and independence
+
+Let $A$ and $B$ be events in the sample space $S$, with $P(B) \neq0$. The *conditional probability* of $A$ given $B$ is
+
+$$
+P(A|B)=\frac{P(A \cap B)}{P(B)}
+$$
+
+Example: let $A$ be the event "both dice are 4" and $B$ be the event "the sum is 8".
+
+$$
+P(A|B)=\frac{P(A \cap B)}{P(B)}=\frac{1 / 36}{5 / 36}=\frac{1}{5}
+$$
+
+## 2.3.1 Independent events
