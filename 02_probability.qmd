@@ -484,4 +484,99 @@ Example:
 
 -   There were 97583 girls born in 1880, and 177907 girls born in 1980
 
-Suppose that a randomly selected girl born in
+Suppose that a randomly selected girl born in 1880 or 1980 is chosen. What is the probability that the girl's name is "Mary"?
+
+-   $A$: the randomly selected girl's name is Mary
+
+-   $B$: the randomly selected girl was born in 1880
+
+$$
+P(A)=P(A|B)P(B)+P(A| \bar{B})P(\bar{B})=\frac{7065}{97583}\frac{97583}{97583+177907}+\frac{11475}{177907}\frac{177907}{177907+97583}=0.0676
+$$
+
+Baye's Rule: Let $A$ and $B$ be events in the sample space $S$.
+
+$$
+P(A|B)=\frac{P(B|A)P(A)}{P(B)}=\frac{P(B|A)P(A)}{P(B|A)P(A)+P(B| \bar{A})P(\bar{A})}
+$$
+
+Example:
+
+In a hotel, 70% of guests are American and 30% are Canadian. It is known that 40% of Americans wear white socks, while 20% of Canadians wear white socks. Suppose you randomly select a person and observe that they are wearing white socks. What is the probability that the person is Canadian?
+
+Let $A$ be the event that a randomly selected person is Canadian. We are given that $P(A)=0.3$ as prior knowledge.
+
+Let $B$ be the event that a randomly selected person is wearing white socks.
+
+$$
+P(A|B)=\frac{P(B|A)P(A)}{P(B|A)P(A)+P(B| \bar{A})P(\bar{A})}=\frac{0.2 \times 0.3}{0.2 \times 0.3+0.4 \times 0.7}=0.176
+$$
+
+# 2.4 Counting arguments
+
+Rule of product: *If there are* $m$ *ways to do something, and for each of those* $m$ *ways there are* $n$ *ways to do another thing, then there are* $m \times n$ *ways to do both things*.
+
+Combinations: *The number of ways of choosing* $k$ *distinct objects from a set of* $n$ *is given by*
+
+$$
+{n \choose k}=\frac{n!}{k!(n-k)!}
+$$
+
+Example: a coin is tossed 10 times. There are $2^{10}=1024$ possible outcomes for the experiment. Let $E$ be the event, "we flipped exactly three heads".
+
+$$
+|E|= {10 \choose 3}= \frac{10 \times 9 \times 8}{3 \times 2 \times 1}=120
+$$
+
+```{r}
+# Simulate the experiment
+event <- replicate(
+  n = 1000,
+  expr = {
+    flips <- sample(x = c("H", "T"), size = 10, replace = TRUE)
+    heads <- sum(flips == "H")
+    heads == 3
+  })
+mean(event)
+```
+
+```{r}
+choose(n = 10, k = 3)
+choose(n = 10, k = 3) / 2^10
+```
+
+Example: in a class of 10 boys and 10 girls, 5 students are randomly chose.
+
+What is the probability that all 5 students are boys?
+
+```{r}
+choose(10, 5) / choose(20, 5)
+```
+
+What is the probability that exactly 4 of the students are girls?
+
+```{r}
+(choose(10, 4) * choose(10, 1)) / choose(20, 5)
+```
+
+Example: a deck of 52 cards has four suits and 13 ranks in each suit. If you are dealt two cards, what is the probability they have the same rank? The sample space is all possible two card hands: ${52 \choose 2}=1326$ possible hands.
+
+First, choose the rank the 2 cards will have: there are 13 choices.
+
+Next, choose two of the four cards with that rank: there are ${4 \choose 2}=6$ choices.
+
+There are $13 \times 6=78$ ways for your hand to have a pair of the same rank.
+
+The probability of getting a pair is $78/1326 \approx0.059$.
+
+```{r}
+# Simulation
+deck <- rep(2:14, 4)
+pair <- replicate(
+  n = 10000,
+  expr = {
+    hand <- sample(deck, 2)
+    hand[1] == hand[2]
+  })
+mean(pair)
+```
