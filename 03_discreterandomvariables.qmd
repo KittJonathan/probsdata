@@ -128,3 +128,100 @@ mean(X)
 ```
 
 # 3.3 Binomial and geometric random variables
+
+A *Bernouilli trial* is an experiment that can result in two outcomes, which we will denote as "success" and "failure". The probability of a success will be denoted $p$, and the probability of failure is therefore $1-p$.
+
+## 3.3.1 Binomial
+
+A random variable $X$ is said to be a *binomial random variable* with parameters $n$ and $p$ if
+
+$$
+P(X=x)={n \choose x}p^x(1-p)^{n-x}
+$$
+
+```{r}
+# Number of heads when three coins are tossed
+x <- 0:3
+dbinom(x, size = 3, prob = 0.5)
+```
+
+Let $X$ be a *binomial random variable* with $n$ trials and probability of success $p$. Then
+
+$$
+E[X]=np
+$$
+
+```{r}
+# 100 dice are thrown. 
+# What is the expected number of sixes?
+100 * (1/6)
+
+# What is the probability of observing 10 or fewer sixes?
+# 0 sixes:
+dbinom(x = 0, size = 100, prob = 1/6)
+# 1 six:
+dbinom(x = 1, size = 100, prob = 1/6)
+# 10 or less sixes:
+sum(dbinom(x = 0:10, size = 100, prob = 1/6))
+```
+
+`pbinom` is the cumulative sum of the pmf:
+
+```{r}
+pbinom(q = 10, size = 100, prob = 1/6)
+```
+
+```{r}
+# Peyton and Riley are running for office, and 46% of all voters
+# prefer Peyton. A poll randomly selects 300 voters.
+
+# What is the expected number of voters who will report a preference for
+# Peyton?
+0.46 * 300
+
+# What is the probability that the poll results suggest Peyton will win?
+1 - pbinom(q = 150, size = 300, prob = 0.46)
+```
+
+```{r}
+# 15 simulations of the Peyton vs. Riley poll
+rbinom(n = 15, size = 300, prob = 0.46)
+```
+
+```{r}
+# Compute P(X > 150) by simulation
+X <- rbinom(n = 10000, size = 300, prob = 0.46)
+mean(X > 150)
+```
+
+## 3.3.2 Geometric
+
+A random variable $X$ is said to be a *geometric random variable* with parameter $p$ if
+
+$$
+P(X=x)=(1-p)^x p
+$$
+
+Let $X$ be the random variable that counts the number of failures before the first success in a Bernouilli process with probability of success $p$. Then $X$ is a geometric random variable.
+
+```{r}
+# A die is tossed until the first 6 occurs. What is the probability that it takes 4 or more tosses?
+sum(dgeom(x = 3:1000, prob = 1/6))
+1 - sum(dgeom(x = 0:2, prob = 1/6))
+1 - pgeom(q = 2, prob = 1/6)
+pgeom(q = 2, prob = 1/6, lower.tail = FALSE)
+```
+
+```{r}
+# Simulation
+X <- rgeom(n = 10000, prob = 1/6)
+mean(X >= 3)
+```
+
+Let $X$ be a geometric random variable with probability of success $p$. Then
+
+$$
+E[X]=\frac{(1-p)}{p}
+$$
+
+# 3.4 Functions of a random variable
